@@ -5,7 +5,8 @@ import Layout from "./routes/Layout";
 import Home from "./components/ui/Home";
 import TripsData from "./components/pages/Trips";
 import TripDetail from "./components/pages/TripDetail";
-import Auth from "./auth/Auth";   
+import Auth from "./auth/Auth";  
+import BookingForm from "./components/pages/BookingForm"; 
 
 const App = () => {
   const router = createBrowserRouter([
@@ -28,6 +29,10 @@ const App = () => {
         {
           path: "login",      
           element: <Auth />,
+        },
+         {
+          path: "booking",      
+          element: <BookingForm />,
         },
       ],
     },

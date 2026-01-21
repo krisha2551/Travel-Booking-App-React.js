@@ -11,10 +11,14 @@ import {
   Accordion,
 } from "react-bootstrap";
 import { trips } from "../../data/TripsData";
+import { useAuth } from "../../context/AuthContext";
+
 
 const TripDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
 
   const trip = trips.find((t) => t.id === Number(id));
 
@@ -234,8 +238,11 @@ const TripDetail = () => {
                   size="lg"
                   className="w-100 mb-2"
                   style={{ backgroundColor: "#0A5A5A", border: "none" }}
+                  onClick={() =>
+                  currentUser ? navigate("/booking") : navigate("/login")
+                  }
                 >
-                  Book Now
+                 Book Now
                 </Button>
 
                 <Button

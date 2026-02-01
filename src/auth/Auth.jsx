@@ -1,144 +1,134 @@
-import React, { useState } from "react";
-import Container from "react-bootstrap/Container";
-import Form from "react-bootstrap/Form";
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
-import Alert from "react-bootstrap/Alert";
-import { FcGoogle } from "react-icons/fc";
-
-import { auth, googleProvider } from "../Firebase/config";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
 } from "firebase/auth";
+import React, { useState } from "react";
+import { auth, googleProvider } from "../firebase/config";
+
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Card,
+  Alert,
+} from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [user, setUser] = useState("");
-  const [authData, setAuthData] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleChange = (identifier, e) => {
-    setAuthData((prev) => ({
-      ...prev,
-      [identifier]: e.target.value,
-    }));
+  const [authData, setAuthData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const navigate = useNavigate();
+
+  const [error, setError] = useState(null);
+
+  const handleAuthData = (e, identifier) => {
+    setAuthData((prevData) => {
+      return {
+        ...prevData,
+        [identifier]: e.target.value,
+      };
+    });
   };
 
-  const handleForm = async (e) => {
+  console.log("authdata", authData);
+
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
 
     try {
       if (isLogin) {
         const result = await signInWithEmailAndPassword(
           auth,
           authData.email,
-          authData.password
+          authData.password,
         );
-        setUser(result.user.email);
+        if (result) {
+          navigate("/trips");
+        }
       } else {
         const result = await createUserWithEmailAndPassword(
           auth,
           authData.email,
-          authData.password
+          authData.password,
         );
-        setUser(result.user.email);
+        if (result) {
+          navigate("/trips");
+        }
       }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setError(error);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError("");
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      setUser(result.user.email);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+
+       if (result) {
+          navigate("/trips");
+        }
+    } catch (error) {
+      setError(error);
     }
   };
 
   return (
-    <Container className="mt-5">
-      <div className="d-flex justify-content-center">
-        <Card className="p-4 shadow-sm" style={{ width: "360px" }}>
-          <h4 className="text-center mb-3">
-            {isLogin ? "Login" : "Create Account"}
-          </h4>
-
-          {error && <Alert variant="danger">{error}</Alert>}
-          {user && <Alert variant="success">Welcome: {user}</Alert>}
-
-          <Form onSubmit={handleForm}>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                required
-                value={authData.email}
-                onChange={(e) => handleChange("email", e)}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                required
-                value={authData.password}
-                onChange={(e) => handleChange("password", e)}
-              />
-            </Form.Group>
-
-            <Button
-              type="submit"
-              variant="success"
-              className="w-100 mb-2"
-              disabled={loading}
+    <Container className="d-flex justify-content-center align-items-center min-vh-100">
+      <Row>
+        <Col>
+          <Card className="shadow  p-4" style={{ width: "400px" }}>
+            <Card.Title className="text-center">
+            <h4>  {isLogin ? "Login" : "Sign up"}</h4>
+            </Card.Title>
+            <Form
+              className="d-flex justify-content-center align-items-center flex-column"
+              onSubmit={handleFormSubmit}
             >
-              {isLogin ? "Login" : "Signup"}
-            </Button>
-          </Form>
+              {error && <Alert variant="danger">{error}</Alert>}
 
-          <Button
-            onClick={handleGoogleLogin}
-            variant="light"
-            className="w-100 border d-flex align-items-center justify-content-center gap-2"
-            disabled={loading}
-          >
-            <FcGoogle size={22} />
-            Continue with Google
-          </Button>
-
-          <div className="text-center mt-3">
-            {isLogin ? (
-              <>
-                New user?{" "}
-                <Button variant="link" onClick={() => setIsLogin(false)}>
-                  Create Account
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={authData.email}
+                  onChange={(e) => handleAuthData(e, "email")}
+                ></Form.Control>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={authData.password}
+                  onChange={(e) => handleAuthData(e, "password")}
+                ></Form.Control>
+              </Form.Group>
+              <div className="d-grid">
+                <Button type="submit" className="mb-2">
+                  {isLogin ? "Login" : "create new account"}
                 </Button>
-              </>
-            ) : (
-              <>
-                Already have account?{" "}
-                <Button variant="link" onClick={() => setIsLogin(true)}>
-                  Login
+                <br />
+                <Button variant="outline-secondary" onClick={handleGoogleLogin}>
+                  Login With Google
                 </Button>
-              </>
-            )}
-          </div>
-        </Card>
-      </div>
+                <br />
+                <Button variant="link" onClick={() => setIsLogin(!isLogin)}>
+                  {isLogin
+                    ? "do not have account ? "
+                    : "already have an account"}
+                </Button>
+              </div>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
     </Container>
   );
 };

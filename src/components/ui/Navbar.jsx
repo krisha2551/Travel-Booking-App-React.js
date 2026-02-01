@@ -1,63 +1,44 @@
+import { useContext } from "react";
 import { Container, Navbar, Nav, Button } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase/config";
 
 function NavbarMenu() {
-  const { currentUser, logout } = useAuth();
+  const { user } = useContext(AuthContext);
 
-  
-  const userInitial = currentUser?.email?.charAt(0).toUpperCase();
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
 
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
-        <Navbar.Brand>Travelia</Navbar.Brand>
-
+        <Navbar.Brand href="#home">Travelia</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto align-items-center gap-2">
+          <Nav className="ms-auto">
             <Nav.Link as={NavLink} to="/">
               Home
             </Nav.Link>
-            <Nav.Link as={NavLink} to="/trips">
+            <Nav.Link as={NavLink} to="trips">
               Trips
             </Nav.Link>
             <Nav.Link href="#link">Destinations</Nav.Link>
             <Nav.Link href="#link">About</Nav.Link>
 
-            {currentUser ? (
-              <>
-              
-                <div
-                  style={{
-                    width: "38px",
-                    height: "38px",
-                    borderRadius: "50%",
-                    backgroundColor: "#6f42c1",
-                    color: "white",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    fontSize: "18px",
-                  }}
-                  title={currentUser.email}
-                >
-                  {userInitial}
-                </div>
-
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={logout}
-                >
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <Nav.Link as={NavLink} to="/login">
-                Sign In
+            {!user ? (
+              <Nav.Link as={NavLink} to="/auth">
+                Login
               </Nav.Link>
+            ) : (
+              <>
+                <Nav.Link as={NavLink} to="/myBooking" className="me-2">
+                  My Bookings
+                </Nav.Link>
+                <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+              </>
             )}
           </Nav>
         </Navbar.Collapse>
